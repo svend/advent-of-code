@@ -150,7 +150,7 @@ mod tests {
         let input = include_str!("3.input");
         let claims: Vec<_> = input.lines().map(|s| s.to_string()).collect();
         for c in claims {
-            println!("{}", c)
+            println!("{:?}", c.split_whitespace())
         }
         unimplemented!()
     }
