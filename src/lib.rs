@@ -69,6 +69,101 @@ fn common_chars(s1: &str, s2: &str) -> String {
         .collect()
 }
 
+#[derive(Debug)]
+struct Claim {
+    id: u32,
+    origin_x: u32,
+    origin_y: u32,
+    width: u32,
+    height: u32,
+}
+
+fn parse_claim(s: &str) -> Claim {
+    let fields: Vec<_> = s.split_whitespace().collect();
+    let id = fields[0].trim_start_matches('#').parse::<u32>().unwrap();
+    let loc: Vec<_> = fields[2]
+        .trim_end_matches(':')
+        .split(',')
+        .map(|s| s.parse::<u32>().unwrap())
+        .collect();
+    let origin_x = loc[0];
+    let origin_y = loc[1];
+    let dims: Vec<_> = fields[3]
+        .split('x')
+        .map(|s| s.parse::<u32>().unwrap())
+        .collect();
+    let width = dims[0];
+    let height = dims[1];
+
+    Claim {
+        id,
+        origin_x,
+        origin_y,
+        width,
+        height,
+    }
+}
+
+fn make_sheet(size: usize) -> Vec<Vec<u32>> {
+    let mut sheet = Vec::new();
+    for _ in 0..size {
+        let row = vec![0; size];
+        sheet.push(row)
+    }
+
+    sheet
+}
+
+fn apply_claims(size: usize, claims: &[Claim]) -> Vec<Vec<u32>> {
+    let mut sheet = make_sheet(size);
+
+    for c in claims {
+        for x in 0..c.width {
+            for y in 0..c.height {
+                sheet[(c.origin_x + x) as usize][(c.origin_y + y) as usize] += 1;
+            }
+        }
+    }
+
+    sheet
+}
+
+fn overlaps(size: usize, claims: &[Claim]) -> u32 {
+    let sheet = apply_claims(size, claims);
+
+    let mut overlaps = 0;
+    for row in sheet.iter() {
+        for column in row.iter() {
+            if column > &1 {
+                overlaps += 1;
+            }
+        }
+    }
+
+    overlaps
+}
+
+fn no_overlaps(size: usize, claims: &[Claim]) -> Vec<u32> {
+    let sheet = apply_claims(size, &claims);
+
+    let mut ok_claims = vec![];
+    for c in claims {
+        let mut overlaps = false;
+        for x in 0..c.width {
+            for y in 0..c.height {
+                if sheet[(c.origin_x + x) as usize][(c.origin_y + y) as usize] > 1 {
+                    overlaps = true;
+                }
+            }
+        }
+        if !overlaps {
+            ok_claims.push(c.id);
+        }
+    }
+
+    ok_claims
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -146,12 +241,20 @@ mod tests {
     }
 
     #[test]
-    fn test_foo() {
+    fn test_overlaps() {
         let input = include_str!("3.input");
-        let claims: Vec<_> = input.lines().map(|s| s.to_string()).collect();
-        for c in claims {
-            println!("{:?}", c.split_whitespace())
-        }
-        unimplemented!()
+        let claims: Vec<_> = input.lines().map(|s| parse_claim(s)).collect();
+
+        assert_eq!(overlaps(5000, &claims), 115304);
+    }
+
+    #[test]
+    fn test_no_overlaps() {
+        let input = include_str!("3.input");
+        let claims: Vec<_> = input.lines().map(|s| parse_claim(s)).collect();
+
+        let ok_claims = no_overlaps(5000, &claims);
+        assert_eq!(ok_claims.len(), 1);
+        assert_eq!(ok_claims.first(), Some(&275));
     }
 }
