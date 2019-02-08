@@ -104,7 +104,9 @@ fn parse_claim(s: &str) -> Claim {
     }
 }
 
-fn make_sheet(size: usize) -> Vec<Vec<u32>> {
+type Sheet = Vec<Vec<u32>>;
+
+fn make_sheet(size: usize) -> Sheet {
     let mut sheet = Vec::new();
     for _ in 0..size {
         let row = vec![0; size];
@@ -114,7 +116,7 @@ fn make_sheet(size: usize) -> Vec<Vec<u32>> {
     sheet
 }
 
-fn apply_claims(size: usize, claims: &[Claim]) -> Vec<Vec<u32>> {
+fn apply_claims(size: usize, claims: &[Claim]) -> Sheet {
     let mut sheet = make_sheet(size);
 
     for c in claims {
