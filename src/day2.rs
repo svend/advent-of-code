@@ -24,7 +24,7 @@ fn differs_by(s1: &str, s2: &str) -> usize {
 }
 
 fn combinations(ids: &[&str]) -> Vec<(String, String)> {
-    let mut cs: Vec<(String, String)> = vec![];
+    let mut cs = vec![];
     for (i, id1) in ids.iter().enumerate() {
         for id2 in ids.iter().skip(i + 1) {
             cs.push((id1.to_string(), id2.to_string()))
