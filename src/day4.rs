@@ -103,7 +103,22 @@ fn max_time(naps: &[&Nap]) -> u32 {
         .0
 }
 
-fn id_times_minute(lines: &[&str]) -> u32 {
+fn max_time_2(naps: &[Nap]) -> (u32, u32) {
+    let mut occurences = HashMap::new();
+    for nap in naps {
+        for i in nap.start..nap.end {
+            *occurences.entry((nap.id, i)).or_insert(0) += 1;
+        }
+    }
+
+    occurences
+        .into_iter()
+        .max_by(|(_, v1), (_, v2)| v1.cmp(v2))
+        .unwrap()
+        .0
+}
+
+fn lines_to_naps(lines: &[&str]) -> Vec<Nap> {
     let mut naps: Vec<Nap> = vec![];
 
     let mut nap = Nap {
@@ -126,6 +141,12 @@ fn id_times_minute(lines: &[&str]) -> u32 {
         }
     }
 
+    naps
+}
+
+fn id_times_minute(lines: &[&str]) -> u32 {
+    let naps = lines_to_naps(lines);
+
     let mut durations = HashMap::new();
 
     for nap in &naps {
@@ -143,6 +164,13 @@ fn id_times_minute(lines: &[&str]) -> u32 {
     id_max * mtime
 }
 
+fn id_times_minute_2(lines: &[&str]) -> u32 {
+    let naps = lines_to_naps(lines);
+    let (id, minute) = max_time_2(&naps);
+
+    id * minute
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -156,5 +184,16 @@ mod tests {
         let input = include_str!("4.input");
         let lines: Vec<_> = input.lines().collect();
         assert_eq!(id_times_minute(&lines), 35623);
+    }
+
+    #[test]
+    fn test_foo() {
+        let input = include_str!("4.example.input");
+        let lines: Vec<_> = input.lines().collect();
+        assert_eq!(id_times_minute_2(&lines), 4455);
+
+        let input = include_str!("4.input");
+        let lines: Vec<_> = input.lines().collect();
+        assert_eq!(id_times_minute_2(&lines), 23037);
     }
 }

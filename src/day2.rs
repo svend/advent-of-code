@@ -10,7 +10,7 @@ fn appears_n(s: &str, n: i32) -> bool {
     counts.values().find(|&&i| i == n).is_some()
 }
 
-fn checksum(ids: &[String]) -> usize {
+fn checksum(ids: &[&str]) -> usize {
     let two_times = ids.iter().filter(|s| appears_n(s, 2)).count();
     let three_times = ids.iter().filter(|s| appears_n(s, 3)).count();
     two_times * three_times
@@ -23,17 +23,17 @@ fn differs_by(s1: &str, s2: &str) -> usize {
         .count()
 }
 
-fn combinations(ids: &[String]) -> Vec<(String, String)> {
+fn combinations(ids: &[&str]) -> Vec<(String, String)> {
     let mut cs: Vec<(String, String)> = vec![];
     for (i, id1) in ids.iter().enumerate() {
         for id2 in ids.iter().skip(i + 1) {
-            cs.push((id1.to_owned(), id2.to_owned()))
+            cs.push((id1.to_string(), id2.to_string()))
         }
     }
     cs
 }
 
-fn close_ids(ids: &[String]) -> Vec<(String, String)> {
+fn close_ids(ids: &[&str]) -> Vec<(String, String)> {
     combinations(ids)
         .into_iter()
         .filter(|(id1, id2)| differs_by(id1, id2) == 1)
@@ -60,16 +60,13 @@ mod tests {
 
     #[test]
     fn test_checksum() {
-        let ids: Vec<_> = [
+        let ids = [
             "abcdef", "bababc", "abbcde", "abcccd", "aabcdd", "abcdee", "ababab",
-        ]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+        ];
         assert_eq!(checksum(&ids), 12);
 
         let input = include_str!("2.input");
-        let ids: Vec<_> = input.lines().map(|s| s.to_string()).collect();
+        let ids: Vec<_> = input.lines().collect();
         assert_eq!(checksum(&ids), 8820);
     }
 
@@ -81,18 +78,15 @@ mod tests {
 
     #[test]
     fn test_close_ids() {
-        let ids: Vec<_> = [
+        let ids = [
             "abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz",
-        ]
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+        ];
         let close = close_ids(&ids);
         let (id1, id2) = close.first().unwrap();
         assert_eq!(common_chars(&id1, &id2), "fgij");
 
         let input = include_str!("2.input");
-        let ids: Vec<_> = input.lines().map(|s| s.to_string()).collect();
+        let ids: Vec<_> = input.lines().collect();
         let close = close_ids(&ids);
         let (id1, id2) = close.first().unwrap();
         assert_eq!(common_chars(&id1, &id2), "bpacnmglhizqygfsjixtkwudr");
