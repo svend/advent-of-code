@@ -96,11 +96,7 @@ fn max_time(naps: &[&Nap]) -> u32 {
         }
     }
 
-    occurences
-        .into_iter()
-        .max_by(|(_, v1), (_, v2)| v1.cmp(v2))
-        .unwrap()
-        .0
+    occurences.into_iter().max_by_key(|&(_, v)| v).unwrap().0
 }
 
 fn max_time_2(naps: &[Nap]) -> (u32, u32) {
@@ -111,11 +107,7 @@ fn max_time_2(naps: &[Nap]) -> (u32, u32) {
         }
     }
 
-    occurences
-        .into_iter()
-        .max_by(|(_, v1), (_, v2)| v1.cmp(v2))
-        .unwrap()
-        .0
+    occurences.into_iter().max_by_key(|&(_, v)| v).unwrap().0
 }
 
 fn lines_to_naps(lines: &[&str]) -> Vec<Nap> {
