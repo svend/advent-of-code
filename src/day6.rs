@@ -8,9 +8,11 @@ fn new_grid(width: usize, height: usize) -> Grid {
 }
 
 fn print_grid(grid: &Grid) {
-    for row in grid {
-        let row: String = row
+    let width = grid.first().map(|column| column.len()).unwrap_or(0);
+    for column in 0..width {
+        let row: String = grid
             .iter()
+            .map(|c| c[column])
             .map(|c| match c {
                 Some(_) => 'x',
                 None => '.',
