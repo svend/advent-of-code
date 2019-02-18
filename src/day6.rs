@@ -1,62 +1,92 @@
+use std::fmt;
+
 #[derive(Clone, Debug, PartialEq)]
 struct Point(i32, i32);
 
-type Grid = Vec<Vec<Option<()>>>;
+struct Grid(Vec<Vec<Option<()>>>);
 
-fn new_grid(width: usize, height: usize) -> Grid {
-    vec![vec![None; height]; width]
-}
-
-fn grid_from_points(points: &[Point]) -> Grid {
-    let max_x = points.iter().map(|Point(x, _)| x).max().unwrap();
-    let max_y = points.iter().map(|Point(_, y)| y).max().unwrap();
-    let mut grid = new_grid(*max_x as usize + 1, *max_y as usize + 1);
-    for point in points {
-        grid_on(&mut grid, &point);
+impl Grid {
+    fn new(width: usize, height: usize) -> Self {
+        Grid(vec![vec![None; height]; width])
     }
-    grid
-}
 
-fn print_grid(grid: &Grid) {
-    let width = grid.first().map(|column| column.len()).unwrap_or(0);
-    for column in 0..width {
-        let row: String = grid
-            .iter()
-            .map(|c| c[column])
-            .map(|c| match c {
-                Some(_) => 'x',
-                None => '.',
-            })
-            .collect();
-        println!("{}", row)
-    }
-}
-
-fn grid_points(grid: &Grid) -> Vec<Point> {
-    let mut points = vec![];
-    for (x, row) in grid.iter().enumerate() {
-        for (y, _) in row.iter().enumerate() {
-            points.push(Point(x as i32, y as i32))
+    fn from_points(points: &[Point]) -> Self {
+        let max_x = points.iter().map(|Point(x, _)| x).max().unwrap();
+        let max_y = points.iter().map(|Point(_, y)| y).max().unwrap();
+        let mut grid = Self::new(*max_x as usize + 1, *max_y as usize + 1);
+        for point in points {
+            Self::on(&mut grid, &point);
         }
+        grid
     }
-    points
-}
 
-fn occupied_points(grid: &Grid) -> Vec<Point> {
-    let mut points = vec![];
-    for (x, row) in grid.iter().enumerate() {
-        for (y, column) in row.iter().enumerate() {
-            if column.is_some() {
+    fn on(&mut self, point: &Point) {
+        let Point(x, y) = point;
+        self.0[*x as usize][*y as usize] = Some(())
+    }
+
+    fn height(&self) -> usize {
+        self.0.first().map(|column| column.len()).unwrap_or(0)
+    }
+
+    fn width(&self) -> usize {
+        self.0.len()
+    }
+
+    fn all_points(&self) -> Vec<Point> {
+        let mut points = vec![];
+        for (x, row) in self.0.iter().enumerate() {
+            for (y, _) in row.iter().enumerate() {
                 points.push(Point(x as i32, y as i32))
             }
         }
+        points
     }
-    points
+
+    fn border_points(&self) -> Vec<Point> {
+        let points = self.all_points();
+        points
+            .into_iter()
+            .filter(|Point(x, y)| {
+                *x == 0
+                    || *x == (self.width() as i32 - 1)
+                    || *y == 0
+                    || *y == (self.height() as i32 - 1)
+            })
+            .collect()
+    }
+
+    fn occupied_points(&self) -> Vec<Point> {
+        let mut points = vec![];
+        for (x, row) in self.0.iter().enumerate() {
+            for (y, column) in row.iter().enumerate() {
+                if column.is_some() {
+                    points.push(Point(x as i32, y as i32))
+                }
+            }
+        }
+        points
+    }
 }
 
-fn grid_on(grid: &mut Grid, point: &Point) {
-    let Point(x, y) = point;
-    grid[*x as usize][*y as usize] = Some(())
+impl fmt::Debug for Grid {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut s = String::new();
+        for column in 0..self.height() {
+            let row: String = self
+                .0
+                .iter()
+                .map(|c| c[column])
+                .map(|c| match c {
+                    Some(_) => 'X',
+                    None => '.',
+                })
+                .collect();
+            s.push_str("\n");
+            s.push_str(&row);
+        }
+        write!(f, "{}", s)
+    }
 }
 
 fn closest_point(p: &Point, ps: &[Point]) -> Option<Point> {
@@ -69,26 +99,6 @@ fn closest_point(p: &Point, ps: &[Point]) -> Option<Point> {
         [p] => Some(p.clone().clone()),
         _ => None,
     }
-}
-
-fn outermost_points(points: &[Point]) -> Vec<&Point> {
-    let mut outer = vec![];
-
-    let mut xs: Vec<_> = points.iter().map(|Point(x, _)| x).collect();
-    xs.sort();
-    let xs = vec![xs.first().unwrap(), xs.last().unwrap()];
-
-    let mut ys: Vec<_> = points.iter().map(|Point(_, y)| y).collect();
-    ys.sort();
-    let ys = vec![ys.first().unwrap(), ys.last().unwrap()];
-
-    for point in points {
-        let Point(x, y) = point;
-        if xs.contains(&&x) || ys.contains(&&y) {
-            outer.push(point)
-        }
-    }
-    outer
 }
 
 fn parse_line(s: &str) -> Point {
@@ -111,17 +121,23 @@ fn manhattan_distance(p1: &Point, p2: &Point) -> i32 {
 }
 
 fn get_max_area(points: &[Point]) -> usize {
-    let grid = grid_from_points(&points);
+    let grid = Grid::from_points(&points);
 
-    let all_points = grid_points(&grid);
-    let occupied = occupied_points(&grid);
-    let outermost = outermost_points(&occupied);
+    let all_points = grid.all_points();
+    let border_points = grid.border_points();
+    let occupied = grid.occupied_points();
+
+    let border_closest: Vec<_> = border_points
+        .iter()
+        .map(|p| closest_point(p, &occupied))
+        .filter_map(|x| x)
+        .collect();
 
     let closest: Vec<_> = all_points
         .iter()
         .map(|p| closest_point(p, &occupied))
         .filter_map(|x| x)
-        .filter(|p| !outermost.contains(&p))
+        .filter(|p| !border_closest.contains(p))
         .collect();
 
     closest
@@ -131,9 +147,35 @@ fn get_max_area(points: &[Point]) -> usize {
         .unwrap()
 }
 
+fn get_max_area2(points: &[Point], less: i32) -> usize {
+    let grid = Grid::from_points(&points);
+
+    let all_points = grid.all_points();
+    let occupied = grid.occupied_points();
+
+    all_points
+        .iter()
+        .filter(|p1| {
+            occupied
+                .iter()
+                .map(|p2| manhattan_distance(p1, p2))
+                .sum::<i32>()
+                < less
+        })
+        .count()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_manhattan_distance() {
+        let p1 = Point(0, 0);
+        let p2 = Point(6, 6);
+        assert_eq!(manhattan_distance(&p1, &p2), 12);
+        assert_eq!(manhattan_distance(&p2, &p1), 12);
+    }
 
     #[test]
     fn test_max_area() {
@@ -150,38 +192,19 @@ mod tests {
         let input = include_str!("6.input");
         let lines: Vec<_> = input.lines().collect();
         let points = parse_lines(&lines);
-        assert_eq!(get_max_area(&points), 6278);
+        assert_eq!(get_max_area(&points), 4475);
     }
 
     #[test]
-    fn test_outermost_points() {
+    fn test_max_area2() {
         let input = include_str!("6.example.input");
         let lines: Vec<_> = input.lines().collect();
         let points = parse_lines(&lines);
-        assert_eq!(
-            outermost_points(&points),
-            vec![&Point(1, 1), &Point(1, 6), &Point(8, 3), &Point(8, 9)]
-        );
+        assert_eq!(get_max_area2(&points, 32), 16);
 
         let input = include_str!("6.input");
         let lines: Vec<_> = input.lines().collect();
         let points = parse_lines(&lines);
-        assert_eq!(
-            outermost_points(&points),
-            vec![
-                &Point(359, 177),
-                &Point(101, 47),
-                &Point(147, 351),
-                &Point(54, 122)
-            ]
-        );
-    }
-
-    #[test]
-    fn test_manhattan_distance() {
-        let p1 = Point(0, 0);
-        let p2 = Point(6, 6);
-        assert_eq!(manhattan_distance(&p1, &p2), 12);
-        assert_eq!(manhattan_distance(&p2, &p1), 12);
+        assert_eq!(get_max_area2(&points, 10000), 35237);
     }
 }
