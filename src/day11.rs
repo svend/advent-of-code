@@ -45,6 +45,20 @@ fn max_power(grid: &Grid) -> (usize, usize) {
     powers.into_iter().max_by_key(|&(_, v)| v).unwrap().0
 }
 
+fn max_power_2(grid: &Grid) -> (usize, usize, usize) {
+    let mut powers = HashMap::new();
+    for size in 1..=grid.0.len() {
+        for (x, columns) in grid.0.windows(size).enumerate() {
+            for column in columns {
+                for (y, rows) in column.windows(size).enumerate() {
+                    *powers.entry((x, y, size)).or_insert(0) += rows.iter().sum::<i32>();
+                }
+            }
+        }
+    }
+    powers.into_iter().max_by_key(|&(_, v)| v).unwrap().0
+}
+
 fn power(x: usize, y: usize, serial: i32) -> i32 {
     let rack_id = x as i32 + 10;
     let power = rack_id * y as i32;
@@ -83,5 +97,17 @@ mod tests {
 
         let grid = Grid::new(8772);
         assert_eq!(max_power(&grid), (235, 31));
+    }
+
+    #[test]
+    fn test_max_power_2() {
+        let grid = Grid::new(18);
+        assert_eq!(max_power_2(&grid), (90, 269, 16));
+
+        let grid = Grid::new(42);
+        assert_eq!(max_power_2(&grid), (232, 251, 12));
+
+        let grid = Grid::new(8772);
+        assert_eq!(max_power_2(&grid), (241, 65, 10));
     }
 }
