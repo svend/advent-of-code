@@ -36,13 +36,7 @@ fn parse_claim(s: &str) -> Claim {
 type Sheet = Vec<Vec<u32>>;
 
 fn sheet_new(size: usize) -> Sheet {
-    let mut sheet = Vec::new();
-    for _ in 0..size {
-        let row = vec![0; size];
-        sheet.push(row)
-    }
-
-    sheet
+    vec![vec![0; size]; size]
 }
 
 fn apply_claims(size: usize, claims: &[Claim]) -> Sheet {
