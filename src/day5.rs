@@ -83,7 +83,7 @@ mod tests {
         assert_eq!(reacted, "dabCBAcaDA".chars().collect::<Vec<_>>());
         assert_eq!(reacted.len(), 10);
 
-        let s = include_str!("5.input").trim_right();
+        let s = include_str!("5.input").trim_end();
         let cs: Vec<_> = s.chars().collect();
         let reacted = react(&cs);
         assert_eq!(reacted.len(), 10888);
@@ -95,7 +95,7 @@ mod tests {
         let cs: Vec<_> = s.chars().collect();
         assert_eq!(shortest_react(&cs), 4);
 
-        let s = include_str!("5.input").trim_right();
+        let s = include_str!("5.input").trim_end();
         let cs: Vec<_> = s.chars().collect();
         assert_eq!(shortest_react(&cs), 6952);
     }
