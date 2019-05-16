@@ -33,10 +33,10 @@ fn parse_claim(s: &str) -> Claim {
     }
 }
 
-type Sheet = Vec<Vec<u32>>;
+type Sheet = Vec<u32>;
 
 fn sheet_new(size: usize) -> Sheet {
-    vec![vec![0; size]; size]
+    vec![0; size * size]
 }
 
 fn apply_claims(size: usize, claims: &[Claim]) -> Sheet {
@@ -45,7 +45,7 @@ fn apply_claims(size: usize, claims: &[Claim]) -> Sheet {
     for c in claims {
         for x in 0..c.width {
             for y in 0..c.height {
-                sheet[c.origin_x + x][c.origin_y + y] += 1;
+                sheet[(c.origin_x + x) * size + (c.origin_y + y)] += 1;
             }
         }
     }
@@ -57,11 +57,9 @@ fn overlaps(size: usize, claims: &[Claim]) -> u32 {
     let sheet = apply_claims(size, claims);
 
     let mut overlaps = 0;
-    for row in sheet.iter() {
-        for column in row.iter() {
-            if column > &1 {
-                overlaps += 1;
-            }
+    for cell in sheet.iter() {
+        if cell > &1 {
+            overlaps += 1;
         }
     }
 
@@ -76,7 +74,7 @@ fn no_overlaps(size: usize, claims: &[Claim]) -> Vec<u32> {
         let mut overlaps = false;
         for x in 0..c.width {
             for y in 0..c.height {
-                if sheet[(c.origin_x + x) as usize][(c.origin_y + y) as usize] > 1 {
+                if sheet[(c.origin_x + x) * size + (c.origin_y + y)] > 1 {
                     overlaps = true;
                 }
             }
