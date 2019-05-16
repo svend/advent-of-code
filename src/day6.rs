@@ -68,20 +68,20 @@ impl Grid {
 
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut s = String::new();
-        for _ in 0..self.rows {
-            let row: String = self
-                .points
-                .iter()
-                .map(|p| match p {
-                    Some(_) => 'X',
-                    None => '.',
-                })
-                .collect();
-            s.push_str("\n");
-            s.push_str(&row);
-        }
-        write!(f, "{}", s)
+        let grid = self
+            .points
+            .chunks(self.columns)
+            .map(|row| {
+                row.into_iter()
+                    .map(|p| match p {
+                        Some(_) => 'X',
+                        None => '.',
+                    })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        write!(f, "{}", grid)
     }
 }
 
