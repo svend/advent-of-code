@@ -3,17 +3,25 @@ use std::fmt;
 #[derive(Clone, Debug, PartialEq)]
 struct Point(usize, usize);
 
-struct Grid(Vec<Vec<Option<()>>>);
+struct Grid {
+    rows: usize,
+    columns: usize,
+    points: Vec<Option<()>>,
+}
 
 impl Grid {
-    fn new(width: usize, height: usize) -> Self {
-        Grid(vec![vec![None; height]; width])
+    fn new(rows: usize, columns: usize) -> Self {
+        Grid {
+            rows,
+            columns,
+            points: vec![None; rows * columns],
+        }
     }
 
     fn from_points(points: &[Point]) -> Self {
         let max_x = points.iter().map(|Point(x, _)| x).max().unwrap();
         let max_y = points.iter().map(|Point(_, y)| y).max().unwrap();
-        let mut grid = Self::new(*max_x + 1, *max_y + 1);
+        let mut grid = Self::new(*max_y + 1, *max_x + 1);
         for point in points {
             Self::on(&mut grid, &point);
         }
@@ -22,21 +30,13 @@ impl Grid {
 
     fn on(&mut self, point: &Point) {
         let Point(x, y) = point;
-        self.0[*x][*y] = Some(())
-    }
-
-    fn height(&self) -> usize {
-        self.0.first().map(|column| column.len()).unwrap_or(0)
-    }
-
-    fn width(&self) -> usize {
-        self.0.len()
+        self.points[*y * self.columns + *x] = Some(())
     }
 
     fn all_points(&self) -> Vec<Point> {
         let mut points = vec![];
-        for (x, row) in self.0.iter().enumerate() {
-            for (y, _) in row.iter().enumerate() {
+        for x in 0..self.columns {
+            for y in 0..self.rows {
                 points.push(Point(x, y))
             }
         }
@@ -48,16 +48,16 @@ impl Grid {
         points
             .into_iter()
             .filter(|Point(x, y)| {
-                *x == 0 || *x == (self.width() - 1) || *y == 0 || *y == (self.height() - 1)
+                *x == 0 || *x == (self.columns - 1) || *y == 0 || *y == (self.rows - 1)
             })
             .collect()
     }
 
     fn occupied_points(&self) -> Vec<Point> {
         let mut points = vec![];
-        for (x, row) in self.0.iter().enumerate() {
-            for (y, column) in row.iter().enumerate() {
-                if column.is_some() {
+        for x in 0..self.columns {
+            for y in 0..self.rows {
+                if self.points[y * self.columns + x].is_some() {
                     points.push(Point(x, y))
                 }
             }
@@ -69,12 +69,11 @@ impl Grid {
 impl fmt::Debug for Grid {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
-        for column in 0..self.height() {
+        for _ in 0..self.rows {
             let row: String = self
-                .0
+                .points
                 .iter()
-                .map(|c| c[column])
-                .map(|c| match c {
+                .map(|p| match p {
                     Some(_) => 'X',
                     None => '.',
                 })
