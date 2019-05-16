@@ -55,13 +55,13 @@ fn parse_line(s: &str) -> Entry {
     let parts: Vec<_> = s.splitn(3, ' ').collect();
 
     let date: Vec<_> = parts[0]
-        .trim_left_matches('[')
+        .trim_start_matches('[')
         .split('-')
         .map(|s| s.parse::<u32>().unwrap())
         .collect();
 
     let time: Vec<_> = parts[1]
-        .trim_right_matches(']')
+        .trim_end_matches(']')
         .splitn(2, ':')
         .map(|s| s.parse::<u32>().unwrap())
         .collect();
@@ -78,7 +78,7 @@ fn parse_line(s: &str) -> Entry {
                 .split_whitespace()
                 .find(|s| s.starts_with('#'))
                 .unwrap()
-                .trim_left_matches('#')
+                .trim_start_matches('#')
                 .parse::<u32>()
                 .unwrap();
             Event::BeginsShift(id)
