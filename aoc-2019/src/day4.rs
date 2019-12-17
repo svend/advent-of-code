@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/4
+
 use std::collections::HashMap;
 
 fn valid(pass: &[u8]) -> bool {

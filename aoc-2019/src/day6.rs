@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/6
+
 use std::collections::{HashMap, HashSet};
 
 struct Graph(HashMap<String, HashSet<String>>);

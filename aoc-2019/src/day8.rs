@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/8
+
 use std::fmt;
 
 type Layer = Vec<u32>;

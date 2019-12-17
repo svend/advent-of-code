@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/1
+
 fn fuel(mass: i32) -> i32 {
     let f = mass / 3 - 2;
     if f == 0 {

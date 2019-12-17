@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/10
+
 use num::rational::Rational;
 use std::collections::{HashMap, HashSet};
 use std::fmt;

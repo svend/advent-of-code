@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/16
+
 const BASE_PATTERN: &[i32] = &[0, 1, 0, -1];
 
 fn pattern(repeat: usize) -> impl Iterator<Item = i32> {
@@ -9,6 +11,7 @@ fn pattern(repeat: usize) -> impl Iterator<Item = i32> {
         .cycle()
 }
 
+/// Returns the ones digit for a number
 fn ones(n: i32) -> i32 {
     (n % 10).abs()
 }

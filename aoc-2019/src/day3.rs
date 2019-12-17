@@ -1,3 +1,5 @@
+// https://adventofcode.com/2019/day/3
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::str::FromStr;
