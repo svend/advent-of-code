@@ -1,5 +1,7 @@
 use std::fmt;
 
+use itertools::Itertools;
+
 #[derive(Clone, Debug, PartialEq)]
 struct Point(usize, usize);
 
@@ -33,20 +35,16 @@ impl Grid {
         self.points[*y * self.columns + *x] = Some(())
     }
 
-    fn all_points(&self) -> Vec<Point> {
-        let mut points = vec![];
-        for x in 0..self.columns {
-            for y in 0..self.rows {
-                points.push(Point(x, y))
-            }
-        }
-        points
+    fn all_points(&self) -> Box<dyn Iterator<Item = Point>> {
+        let iter = (0..self.columns)
+            .cartesian_product(0..self.rows)
+            .map(|(x, y)| Point(x, y));
+        Box::new(iter)
     }
 
     fn border_points(&self) -> Vec<Point> {
         let points = self.all_points();
         points
-            .into_iter()
             .filter(|Point(x, y)| {
                 *x == 0 || *x == (self.columns - 1) || *y == 0 || *y == (self.rows - 1)
             })
@@ -130,8 +128,7 @@ fn get_max_area(points: &[Point]) -> usize {
         .collect();
 
     let closest: Vec<_> = all_points
-        .iter()
-        .map(|p| closest_point(p, &occupied))
+        .map(|p| closest_point(&p, &occupied))
         .filter_map(|x| x)
         .filter(|p| !border_closest.contains(p))
         .collect();
@@ -150,7 +147,6 @@ fn get_max_area2(points: &[Point], less: usize) -> usize {
     let occupied = grid.occupied_points();
 
     all_points
-        .iter()
         .filter(|p1| {
             occupied
                 .iter()
