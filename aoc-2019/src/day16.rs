@@ -1,5 +1,7 @@
 // https://adventofcode.com/2019/day/16
 
+use num::Integer;
+
 const BASE_PATTERN: &[i32] = &[0, 1, 0, -1];
 
 fn pattern(repeat: usize) -> impl Iterator<Item = i32> {
@@ -40,6 +42,10 @@ fn transform_iter(input: Vec<u32>) -> impl Iterator<Item = Vec<u32>> {
 fn calc_offset(input: &[u32]) -> usize {
     let offset: String = input.iter().take(7).map(|n| n.to_string()).collect();
     offset.parse().unwrap()
+}
+
+fn least_common_multiple(n1: usize, n2: usize) -> usize {
+    n1.lcm(&n2)
 }
 
 #[cfg(test)]
@@ -118,6 +124,17 @@ mod tests {
         ];
         for (input, expected) in tests {
             let input = parse_input(input);
+            for i in 1..100 {
+                let pat_len = i * BASE_PATTERN.len();
+                println!(
+                    "phase: {}, input: {}, pattern: {}, lcd: {}",
+                    i,
+                    input.len(),
+                    pat_len,
+                    input.len().lcm(&pat_len)
+                )
+            }
+            panic!("");
             let input: Vec<_> = std::iter::repeat(input).take(10_000).flatten().collect();
             let input = transform_iter(input).skip(100).next().unwrap();
             let offset = calc_offset(&input);
