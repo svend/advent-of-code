@@ -22,21 +22,59 @@ fn parse_input(s: &str) -> Vec<u32> {
     s.trim().chars().map(|c| c.to_digit(10).unwrap()).collect()
 }
 
+fn transform_value<'a, T, U>(input: T, pattern: U) -> i32
+where
+    T: IntoIterator<Item = &'a u32>,
+    U: IntoIterator<Item = i32>,
+{
+    let sum = input
+        .into_iter()
+        .zip(pattern)
+        .map(|(i, j)| (*i as i32) * j)
+        .sum();
+    ones(sum)
+}
+
 fn transform(input: &[u32]) -> Vec<u32> {
-    let mut output = Vec::with_capacity(input.len());
-    for i in 0..input.len() {
-        let sum = input
-            .iter()
-            .zip(pattern(i + 1).skip(1))
-            .map(|(i, j)| (*i as i32) * j)
-            .sum();
-        output.push(ones(sum) as u32)
+    // "When applying the pattern, skip the very first value exactly once."
+    (0..input.len())
+        .map(|i| transform_value(input, pattern(i + 1).skip(1)) as u32)
+        .collect()
+}
+
+fn transform_2(input: &[u32], times: usize) -> Vec<u32> {
+    // length of the repeated input
+    let total_len = times * input.len();
+    let mut output = Vec::with_capacity(total_len);
+    for i in 0..total_len {
+        let i = i + 1;
+        let pat_len = i * BASE_PATTERN.len();
+        let lcm = input.len().lcm(&pat_len);
+        let repeat = lcm / input.len();
+        let repeat = std::cmp::min(repeat, total_len);
+        println!(
+            "value_num: {}, input: {}, pattern: {}, lcm: {}, total_len: {}, repeat: {}",
+            i,
+            input.len(),
+            pat_len,
+            lcm,
+            total_len,
+            repeat,
+        );
+        let input = std::iter::repeat(input.iter()).take(repeat).flatten();
+        let value = transform_value(input, pattern(i + 1).skip(1));
+        output.push(value as u32);
     }
+    dbg!(output.len());
     output
 }
 
 fn transform_iter(input: Vec<u32>) -> impl Iterator<Item = Vec<u32>> {
     std::iter::successors(Some(input), |input| Some(transform(&input)))
+}
+
+fn transform_iter_2(input: Vec<u32>, times: usize) -> impl Iterator<Item = Vec<u32>> {
+    std::iter::successors(Some(input), move |input| Some(transform_2(&input, times)))
 }
 
 fn calc_offset(input: &[u32]) -> usize {
@@ -119,26 +157,16 @@ mod tests {
     #[ignore]
     fn test_part_2() {
         let tests = &[
+            ("12345678", "01029498"),
             ("03036732577212944063491565474664", "84462026"),
             (include_str!("day16.input"), ""),
         ];
         for (input, expected) in tests {
             let input = parse_input(input);
-            for i in 1..100 {
-                let pat_len = i * BASE_PATTERN.len();
-                println!(
-                    "phase: {}, input: {}, pattern: {}, lcd: {}",
-                    i,
-                    input.len(),
-                    pat_len,
-                    input.len().lcm(&pat_len)
-                )
-            }
-            panic!("");
-            let input: Vec<_> = std::iter::repeat(input).take(10_000).flatten().collect();
-            let input = transform_iter(input).skip(100).next().unwrap();
+            let input = transform_iter_2(input, 10).skip(100).next().unwrap();
             let offset = calc_offset(&input);
             let expected = parse_input(expected);
+
             assert_eq!(input[offset..offset + 8].to_vec(), expected);
         }
     }
