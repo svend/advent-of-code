@@ -33,6 +33,20 @@ impl Graph {
             .collect()
     }
 
+    fn trace(&self, point: &Point, previous: &Point) {
+        let points: Vec<_> = self
+            .find(point)
+            .iter()
+            .map(|(p, _d)| *p)
+            .filter(|p| *p != previous)
+            .collect();
+
+        for p in points {
+            println!("trace: {:?} -> {:?}", point, p);
+            &self.trace(p, point);
+        }
+    }
+
     fn points(&self) -> HashSet<&Point> {
         self.0
             .iter()
@@ -58,6 +72,23 @@ mod tests {
         println!("points {:?}", graph.points());
         println!("start {:?}", graph.find(&Start));
         println!("a {:?}", graph.find(&Door('a')));
+        graph.trace(&Start, &Start);
+
+        let graph = vec![
+            (Key('f'), Door('d'), 2),
+            (Door('d'), Door('e'), 2),
+            (Door('e'), Key('e'), 2),
+            (Key('e'), Door('c'), 2),
+            (Door('c'), Key('b'), 2),
+            (Key('b'), Door('a'), 2),
+            (Door('a'), Start, 2),
+            (Start, Key('a'), 2),
+            (Key('a'), Door('b'), 2),
+            (Door('b'), Key('c'), 2),
+            (Key('c'), Key('d'), 24),
+        ];
+        let graph = Graph(graph);
+        graph.trace(&Start, &Start);
         unimplemented!();
     }
 }
