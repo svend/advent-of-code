@@ -224,7 +224,7 @@ mod tests {
         ];
         for (input, expected) in tests {
             let map = Map::parse(input);
-            assert_eq!(&format!("{}", map), input);
+            assert_eq!(&map.to_string(), input);
             assert_eq!(&map.best_point().unwrap(), expected);
         }
     }

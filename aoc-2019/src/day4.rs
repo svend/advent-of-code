@@ -59,7 +59,7 @@ mod tests {
         }
 
         let count = my_input()
-            .map(|i| format!("{}", i))
+            .map(|i| i.to_string())
             .map(|s| parse_input(&s))
             .map(|pass| valid(&pass))
             .filter(|b| *b)
@@ -77,7 +77,7 @@ mod tests {
         }
 
         let count = my_input()
-            .map(|i| format!("{}", i))
+            .map(|i| i.to_string())
             .map(|s| parse_input(&s))
             .map(|pass| valid_2(&pass))
             .filter(|b| *b)

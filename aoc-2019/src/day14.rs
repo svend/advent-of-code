@@ -214,8 +214,7 @@ mod tests {
         let inputs = &["10 ORE => 10 A"];
         for input in inputs {
             let reaction = Reaction::from_str(&input).unwrap();
-            let formatted = format!("{}", reaction);
-            assert_eq!(formatted, **input)
+            assert_eq!(reaction.to_string(), **input)
         }
     }
 
@@ -243,6 +242,6 @@ mod tests {
     //     }
     //     println!("***");
     //     find(&Chemical::new("FUEL", 1), &reactions);
-    //     unimplemented!()
+    //     todo!()
     // }
 }

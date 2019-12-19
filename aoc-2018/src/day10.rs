@@ -116,7 +116,7 @@ fn message(graph: &mut Graph) -> (String, u32) {
         width = width_new;
         height = height_new;
     }
-    (format!("{}", &graph), time)
+    (graph.to_string(), time)
 }
 
 #[cfg(test)]

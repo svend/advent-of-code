@@ -3,92 +3,73 @@
 use std::collections::HashSet;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
-enum Point {
+enum State {
+    Empty,
     Start,
     Key(char),
     Door(char),
 }
 
-type Distance = usize;
-
-type Edge = (Point, Point, Distance);
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct Point(usize, usize);
 
 #[derive(Debug)]
-struct Graph(Vec<Edge>);
+struct Graph(Vec<(Point, State)>);
 
 impl Graph {
-    /// Find all adjacent points to point
-    fn find(&self, point: &Point) -> Vec<(&Point, Distance)> {
-        self.0
-            .iter()
-            .flat_map(|(p1, p2, d)| {
-                if p1 == point {
-                    Some((p2, *d))
-                } else if p2 == point {
-                    Some((p1, *d))
-                } else {
-                    None
-                }
+    fn new(input: &str) -> Self {
+        let points: Vec<(Point, State)> = input
+            .lines()
+            .enumerate()
+            .flat_map(|(y, line)| {
+                line.chars()
+                    .enumerate()
+                    .filter(|(_x, c)| *c != '#')
+                    .map(move |(x, _c)| (Point(x, y), State::Empty))
+                    .collect::<Vec<_>>()
             })
-            .collect()
+            .collect();
+        Self(points)
     }
 
-    fn trace(&self, point: &Point, previous: &Point) {
-        let points: Vec<_> = self
-            .find(point)
-            .iter()
-            .map(|(p, _d)| *p)
-            .filter(|p| *p != previous)
-            .collect();
-
-        for p in points {
-            println!("trace: {:?} -> {:?}", point, p);
-            &self.trace(p, point);
-        }
+    fn contains(&self, point: &Point) -> bool {
+        self.points().contains(point)
     }
 
     fn points(&self) -> HashSet<&Point> {
-        self.0
-            .iter()
-            .flat_map(|(p1, p2, _d)| vec![p1, p2])
-            .collect()
+        self.0.iter().map(|(point, _state)| point).collect()
+    }
+
+    fn max(&self) -> Point {
+        let max_x = self.points().iter().map(|Point(x, _y)| *x).max().unwrap();
+        let max_y = self.points().iter().map(|Point(_x, y)| *y).max().unwrap();
+        Point(max_x, max_y)
+    }
+
+    fn draw(&self) {
+        let Point(max_x, max_y) = self.max();
+        for y in 0..=(max_y + 1) {
+            for x in 0..=(max_x + 1) {
+                if self.contains(&Point(x, y)) {
+                    print!(".");
+                } else {
+                    print!("#");
+                }
+            }
+            println!("");
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Point::*;
     use super::*;
 
     #[test]
     fn test_foo() {
-        let graph = vec![
-            (Start, Key('a'), 2),
-            (Start, Door('a'), 2),
-            (Door('a'), Key('b'), 2),
-        ];
-        let graph = Graph(graph);
-        println!("{:?}", graph);
-        println!("points {:?}", graph.points());
-        println!("start {:?}", graph.find(&Start));
-        println!("a {:?}", graph.find(&Door('a')));
-        graph.trace(&Start, &Start);
-
-        let graph = vec![
-            (Key('f'), Door('d'), 2),
-            (Door('d'), Door('e'), 2),
-            (Door('e'), Key('e'), 2),
-            (Key('e'), Door('c'), 2),
-            (Door('c'), Key('b'), 2),
-            (Key('b'), Door('a'), 2),
-            (Door('a'), Start, 2),
-            (Start, Key('a'), 2),
-            (Key('a'), Door('b'), 2),
-            (Door('b'), Key('c'), 2),
-            (Key('c'), Key('d'), 24),
-        ];
-        let graph = Graph(graph);
-        graph.trace(&Start, &Start);
-        unimplemented!();
+        let input = include_str!("day18.input");
+        let graph = Graph::new(&input);
+        graph.draw();
+        todo!();
     }
 }
