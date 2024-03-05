@@ -12,10 +12,7 @@ type Rule map[string]int
 type RuleSet map[string]Rule
 
 func singular(s string) string {
-	if strings.HasSuffix(s, "s") {
-		return s[:len(s)-1]
-	}
-	return s
+	return strings.TrimSuffix(s, "s")
 }
 
 func parseRule(line string) (string, Rule) {
@@ -31,9 +28,7 @@ func parseRule(line string) (string, Rule) {
 	for i := range contents {
 		c := contents[i]
 		// Remove trailing period
-		if strings.HasSuffix(c, ".") {
-			c = c[:len(c)-1]
-		}
+		c = strings.TrimSuffix(c, ".")
 		c = singular(c)
 		contentParts := strings.SplitN(c, " ", 2)
 		num, err := strconv.Atoi(contentParts[0])

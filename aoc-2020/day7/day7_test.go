@@ -3,14 +3,14 @@ package day7
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func readFile(filename string) io.Reader {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}

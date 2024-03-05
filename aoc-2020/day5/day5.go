@@ -50,9 +50,9 @@ func NewRegion(c rune) Region {
 }
 
 func ParseRegions(rs string) []Region {
-	var regions []Region
-	for _, r := range rs {
-		regions = append(regions, NewRegion(r))
+	regions := make([]Region, len(rs))
+	for i, r := range rs {
+		regions[i] = NewRegion(r)
 	}
 	return regions
 }
